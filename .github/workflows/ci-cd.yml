@@ -1,0 +1,24 @@
+name: Deploy
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_CONTENT }}" > ~/.kube/config
+
+      # - name: Deploy services
+      #   run: |
+      #     helm upgrade --install billing-service ./helm/billing-service
+      #     helm upgrade --install user-service ./helm/user-service
+      #     helm upgrade --install station-management-service ./helm/station-management-service
+      #     helm upgrade --install data-tracking-service ./helm/data-tracking-service
+      #     helm upgrade --install provider-service ./helm/provider-service

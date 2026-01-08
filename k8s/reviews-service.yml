@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviews-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: reviews-service
+  template:
+    metadata:
+      labels:
+        app: reviews-service
+    spec:
+      containers:
+        - name: reviews-service
+          image: ghcr.io/watt-is-up/reviews-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reviews-service
+spec:
+  selector:
+    app: reviews-service
+  ports:
+    - port: 80
+      targetPort: 8080

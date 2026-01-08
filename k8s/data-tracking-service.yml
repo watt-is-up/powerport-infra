@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-tracking-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: data-tracking-service
+  template:
+    metadata:
+      labels:
+        app: data-tracking-service
+    spec:
+      containers:
+        - name: data-tracking-service
+          image: ghcr.io/watt-is-up/data-tracking-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-tracking-service
+spec:
+  selector:
+    app: data-tracking-service
+  ports:
+    - port: 80
+      targetPort: 8080
