@@ -1,9 +1,9 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
-  repository: ghcr.io/watt-is-up/powerport-station-management-service
+  repository: powerportacr.azurecr.io/station-service
   tag: "latest"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP
@@ -11,5 +11,59 @@ service:
 
 containerPort: 8080
 
-env:
-  ASPNETCORE_ENVIRONMENT: "Production"
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+
+# Full appsettings.json as raw string
+appsettingsJson: |
+  {
+    "Tenancy": {
+      "Environment": "local",
+      "TenantDbBase": "Host=postgres;Port=5433;Username=station_tenants_user;Password=secretpassword"
+    },
+    "Kafka": {
+      "BootstrapServers": "kafka:9092",
+      "ChargingSessionsTopic": "charging-session.events",
+      "UserEventsTopic": "user.events",
+      "ProducerName": "station-management-service"
+    },
+    "Simulator": {
+      "ScenariosRootPath": "Scenarios",
+      "SimulateRealTime": true
+    },
+    "Auth": {
+      "Authority": "http://keycloak:8080/realms/powerport",
+      "Audience": "bff-api",
+      "RequireHttpsMetadata": false
+    },
+    "Tenants": {
+      "ina": {
+        "Id": "5a8d3c1f-9e42-4b7d-8f06-2c91e7a4d6b5",
+        "ConnectionString": "Host=postgres;Port=5432;Database=station_ina_db;Username=station_ina_user;Password=secretpassword"
+      },
+      "petrol": {
+        "Id": "91c4b7a2-6d3e-4f89-a5c1-0e2d8b6f7a43",
+        "ConnectionString": "Host=postgres;Port=5432;Database=station_petrol_db;Username=station_petrol_user;Password=secretpassword"
+      },
+      "makpetrol": {
+        "Id": "2e9f6a7b-4c1d-4e3a-9b8f-6d1a7c5e4b04",
+        "ConnectionString": "Host=postgres;Port=5432;Database=station_makpetrol_db;Username=station_makpetrol_user;Password=secretpassword"
+      },
+      "master": {
+        "Id": "00000000-0000-0000-0000-000000000000",
+        "ConnectionString": "Host=postgres;Port=5432;Database=review_master_db;Username=review_master_user;Password=secretpassword"
+      }
+    },
+    "Logging": {
+      "LogLevel": {
+        "Default": "Information",
+        "Microsoft.AspNetCore": "Warning"
+      }
+    },
+    "AllowedHosts": "*"
+  }
