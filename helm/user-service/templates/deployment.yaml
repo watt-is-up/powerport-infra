@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -11,6 +13,9 @@ spec:
     metadata:
       labels:
         app: {{ .Chart.Name }}
+      annotations:
+        # Force restart on config change
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
@@ -20,4 +25,30 @@ spec:
             - containerPort: {{ .Values.containerPort }}
           env:
             - name: ASPNETCORE_ENVIRONMENT
-              value: "{{ .Values.env.ASPNETCORE_ENVIRONMENT }}"
+              value: "Production"
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/appsettings.json
+              subPath: appsettings.json
+              readOnly: true
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          # Using TCP probe since health endpoint not implemented
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Chart.Name }}-config

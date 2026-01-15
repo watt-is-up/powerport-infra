@@ -1,0 +1,258 @@
+{{- if .Values.postgres.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.postgres.storage }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+data:
+  init-tenants.sql: |
+    -- =====================================================================
+    --                          BILLING SERVICE
+    -- =====================================================================
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'billing_shared_user') THEN
+          CREATE ROLE billing_shared_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE billing_shared_db OWNER billing_shared_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'billing_shared_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'billing_ina_user') THEN
+          CREATE ROLE billing_ina_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE billing_ina_db OWNER billing_ina_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'billing_ina_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'billing_petrol_user') THEN
+          CREATE ROLE billing_petrol_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE billing_petrol_db OWNER billing_petrol_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'billing_petrol_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'billing_makpetrol_user') THEN
+          CREATE ROLE billing_makpetrol_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE billing_makpetrol_db OWNER billing_makpetrol_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'billing_makpetrol_db')\gexec
+
+    -- =====================================================================
+    --                          PROVIDER SERVICE
+    -- =====================================================================
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'provider_shared_user') THEN
+          CREATE ROLE provider_shared_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE provider_shared_db OWNER provider_shared_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'provider_shared_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'provider_master_user') THEN
+          CREATE ROLE provider_master_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE provider_master_db OWNER provider_master_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'provider_master_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'provider_ina_user') THEN
+          CREATE ROLE provider_ina_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE provider_ina_db OWNER provider_ina_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'provider_ina_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'provider_petrol_user') THEN
+          CREATE ROLE provider_petrol_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE provider_petrol_db OWNER provider_petrol_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'provider_petrol_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'provider_makpetrol_user') THEN
+          CREATE ROLE provider_makpetrol_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE provider_makpetrol_db OWNER provider_makpetrol_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'provider_makpetrol_db')\gexec
+
+    -- =====================================================================
+    --                          REVIEW SERVICE
+    -- =====================================================================
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'review_master_user') THEN
+          CREATE ROLE review_master_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE review_master_db OWNER review_master_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'review_master_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'review_shared_user') THEN
+          CREATE ROLE review_shared_user LOGIN PASSWORD 'secretpassword' CREATEDB;
+       ELSE
+          ALTER ROLE review_shared_user CREATEDB;
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE review_shared_db OWNER review_shared_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'review_shared_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'review_ina_user') THEN
+          CREATE ROLE review_ina_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE review_ina_db OWNER review_ina_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'review_ina_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'review_petrol_user') THEN
+          CREATE ROLE review_petrol_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE review_petrol_db OWNER review_petrol_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'review_petrol_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'review_makpetrol_user') THEN
+          CREATE ROLE review_makpetrol_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE review_makpetrol_db OWNER review_makpetrol_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'review_makpetrol_db')\gexec
+
+    -- =====================================================================
+    --                          STATION SERVICE
+    -- =====================================================================
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'station_tenants_user') THEN
+          CREATE ROLE station_tenants_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'station_ina_user') THEN
+          CREATE ROLE station_ina_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE station_ina_db OWNER station_ina_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'station_ina_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'station_petrol_user') THEN
+          CREATE ROLE station_petrol_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE station_petrol_db OWNER station_petrol_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'station_petrol_db')\gexec
+
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'station_makpetrol_user') THEN
+          CREATE ROLE station_makpetrol_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE station_makpetrol_db OWNER station_makpetrol_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'station_makpetrol_db')\gexec
+
+    -- =====================================================================
+    --                          KEYCLOAK
+    -- =====================================================================
+    DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'keycloak_user') THEN
+          CREATE ROLE keycloak_user LOGIN PASSWORD 'secretpassword';
+       END IF;
+    END $$;
+    SELECT 'CREATE DATABASE keycloak_db OWNER keycloak_user'
+    WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'keycloak_db')\gexec
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: {{ .Values.postgres.image }}
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: postgres-password
+            - name: POSTGRES_DB
+              value: "postgresdb"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            {{- toYaml .Values.postgres.resources | nindent 12 }}
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+        - name: init-script
+          configMap:
+            name: postgres-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+  type: ClusterIP
+{{- end }}

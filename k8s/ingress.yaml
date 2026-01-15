@@ -1,0 +1,69 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: powerport-ingress
+  namespace: powerport
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2   
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /users(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 80
+          - path: /billing(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: billing-service
+                port:
+                  number: 80
+          - path: /stations(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: station-service
+                port:
+                  number: 80
+          - path: /providers(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: provider-service
+                port:
+                  number: 80
+          - path: /reviews(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: reviews-service
+                port:
+                  number: 80
+          - path: /tracking(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: data-tracking-service
+                port:
+                  number: 80
+          - path: /realms(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
+          - path: /admin(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080

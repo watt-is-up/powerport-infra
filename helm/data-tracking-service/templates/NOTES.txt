@@ -1,0 +1,13 @@
+Data Tracking Service has been deployed!
+
+Service: {{ .Chart.Name }}:{{ .Values.service.port }}
+
+To check status:
+  kubectl get pods -l app={{ .Chart.Name }} -n powerport
+
+To view logs:
+  kubectl logs -f deployment/{{ .Chart.Name }} -n powerport
+
+To test the service locally (port-forward):
+  kubectl port-forward svc/{{ .Chart.Name }} 5005:{{ .Values.service.port }} -n powerport
+  Then open: http://localhost:5005

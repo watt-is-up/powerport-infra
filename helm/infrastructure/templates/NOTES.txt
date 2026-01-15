@@ -1,0 +1,24 @@
+Powerport Infrastructure has been deployed!
+
+Services:
+- PostgreSQL: postgres:5432
+- MongoDB: mongodb:27017
+- Kafka: kafka:9092 (KRaft mode - no Zookeeper needed)
+- Keycloak: keycloak:8080
+
+To check status:
+  kubectl get pods -n powerport
+
+To view logs:
+  kubectl logs -f deployment/postgres -n powerport
+  kubectl logs -f deployment/mongodb -n powerport
+  kubectl logs -f deployment/kafka -n powerport
+  kubectl logs -f deployment/keycloak -n powerport
+
+To access Keycloak UI (port-forward):
+  kubectl port-forward svc/keycloak 8180:8080 -n powerport
+  Then open: http://localhost:8180
+
+Default Keycloak credentials:
+  Username: admin
+  Password: admin

@@ -1,9 +1,9 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
-  repository: ghcr.io/watt-is-up/powerport-data-tracking-service
+  repository: powerportacr.azurecr.io/data-tracking-service
   tag: "latest"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP
@@ -11,5 +11,66 @@ service:
 
 containerPort: 8080
 
-env:
-  ASPNETCORE_ENVIRONMENT: "Production"
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+
+# Full appsettings.json as raw string
+appsettingsJson: |
+  {
+    "Kafka": {
+      "BootstrapServers": "kafka:9092"
+    },
+    "Mongo": {
+      "Host": "mongodb",
+      "Port": 27017
+    },
+    "Tenants": {
+      "ina": {
+        "Id": "5a8d3c1f-9e42-4b7d-8f06-2c91e7a4d6b5",
+        "Mode": "Isolated",
+        "DatabaseConnection": {
+          "User": "data_tracking_ina_user",
+          "Password": "secretpassword",
+          "DatabaseName": "data_tracking_ina_db"
+        }
+      },
+      "petrol": {
+        "Id": "91c4b7a2-6d3e-4f89-a5c1-0e2d8b6f7a43",
+        "Mode": "Isolated",
+        "DatabaseConnection": {
+          "User": "data_tracking_petrol_user",
+          "Password": "secretpassword",
+          "DatabaseName": "data_tracking_petrol_db"
+        }
+      },
+      "makpetrol": {
+        "Id": "2e9f6a7b-4c1d-4e3a-9b8f-6d1a7c5e4b04",
+        "Mode": "Isolated",
+        "DatabaseConnection": {
+          "User": "data_tracking_makpetrol_user",
+          "Password": "secretpassword",
+          "DatabaseName": "data_tracking_makpetrol_db"
+        }
+      },
+      "shared": {
+        "Id": "11111111-1111-1111-1111-111111111111",
+        "Mode": "Isolated",
+        "DatabaseConnection": {
+          "User": "data_tracking_shared_user",
+          "Password": "secretpassword",
+          "DatabaseName": "data_tracking_shared_db"
+        }
+      }
+    },
+    "Logging": {
+      "LogLevel": {
+        "Default": "Information",
+        "Microsoft.AspNetCore": "Warning"
+      }
+    }
+  }
