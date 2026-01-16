@@ -350,6 +350,26 @@ WHERE NOT EXISTS (
    SELECT 1 FROM pg_database WHERE datname = 'station_petrol_db'
 )\gexec
 
+-- =================================================
+-- Station Service - Master
+-- Database: station_master_db
+-- User: station_master_user
+-- =================================================
+DO
+$$
+BEGIN
+   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'station_master_user') THEN
+      CREATE ROLE station_master_user LOGIN PASSWORD 'secretpassword';
+   END IF;
+END
+$$;
+
+SELECT 'CREATE DATABASE station_master_db OWNER station_master_user'
+WHERE NOT EXISTS (
+   SELECT 1 FROM pg_database WHERE datname = 'station_master_db'
+)\gexec
+
+
 
 -- =====================================================================
 --                          KEYCLOAK
